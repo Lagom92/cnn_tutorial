@@ -2,6 +2,7 @@ import os
 import torch
 import torchvision
 import torchvision.transforms as transforms
+import torch.optim as optim
 from vgg16 import VGGNet
 
 # GPU 지정 및 확인
@@ -11,8 +12,9 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Device: ", device)
 
 # Parameters
-batch_size = 4
-epochs = 3
+batch_size = 16
+lr = 0.001
+momentum = 0.9
 
 # Load data
 transform = transforms.Compose([
@@ -32,8 +34,17 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 
 # 저장한 모델 불러오기
 vgg16 = VGGNet(10).to(device)
-PATH = 'vgg16.pth'
-vgg16.load_state_dict(torch.load(PATH))
+
+optimizer = optim.SGD(vgg16.parameters(), lr=lr, momentum=momentum)
+
+checkpoint = torch.load('vgg16_ckpt.pt')
+vgg16.load_state_dict(checkpoint['model_state_dict'])
+optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+epoch = checkpoint['epoch']
+loss = checkpoint['loss']
+
+# PATH = 'vgg16.pth'
+# vgg16.load_state_dict(torch.load(PATH))
 
 # 전체 test 데이터셋에 대한 정확도
 correct = 0
@@ -66,4 +77,4 @@ with torch.no_grad():
             class_total[label] += 1
             
 for i in range(n):
-    print(f"Accuracy of {classes[i]}: {100*class_correct[i] / class_total[i]}%")
+    print(f"Accuracy of {classes[i]}: {100*class_correct[i] / class_total[i]:.2f}%")
