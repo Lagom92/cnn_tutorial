@@ -20,10 +20,10 @@ def generate_box(obj):
 def generate_label(obj):
     name = obj.find('name').text
     if name == "with_mask":
-        return 1
-    elif name == "mask_weared_incorrect":
         return 2
-    return 0    # without_mask
+    elif name == "mask_weared_incorrect":
+        return 3
+    return 1    # without_mask
 
 def generate_target(file):
     with open(file) as f:
@@ -60,6 +60,27 @@ def plot_image(img_path, annotation):
         elif annotation['labels'][idx] == 1 :
             rect = patches.Rectangle((xmin,ymin),(xmax-xmin),(ymax-ymin),linewidth=1,edgecolor='g',facecolor='none')
         else:
+            rect = patches.Rectangle((xmin,ymin),(xmax-xmin),(ymax-ymin),linewidth=1,edgecolor='orange',facecolor='none')
+
+        ax.add_patch(rect)
+
+    plt.show()
+
+def plot_image_from_output(img, annotation):
+    
+    img = img.cpu().permute(1,2,0)
+    
+    fig,ax = plt.subplots(1)
+    ax.imshow(img)
+    
+    for idx in range(len(annotation["boxes"])):
+        xmin, ymin, xmax, ymax = annotation["boxes"][idx]
+
+        if annotation['labels'][idx] == 1 :
+            rect = patches.Rectangle((xmin,ymin),(xmax-xmin),(ymax-ymin),linewidth=1,edgecolor='r',facecolor='none')
+        elif annotation['labels'][idx] == 2 :
+            rect = patches.Rectangle((xmin,ymin),(xmax-xmin),(ymax-ymin),linewidth=1,edgecolor='g',facecolor='none')
+        else :
             rect = patches.Rectangle((xmin,ymin),(xmax-xmin),(ymax-ymin),linewidth=1,edgecolor='orange',facecolor='none')
 
         ax.add_patch(rect)
