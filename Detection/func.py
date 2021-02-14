@@ -8,6 +8,8 @@ import torch
 from torch.utils.data import Dataset
 from PIL import Image
 import torchvision
+import cv2
+import albumentations as A
 
 def generate_box(obj):
     xmin = float(obj.find('xmin').text)
@@ -116,6 +118,40 @@ class MaskDataset(Dataset):
             img = to_tensor(img)
 
         return img, target
+
+class AugmentedMaskDaset(Dataset):
+    def __init__(self, path, transform=None):
+        self.path = path
+        self.imgs = list(sorted(os.listdir(self.path)))
+        self.transform = transform
+        
+    def __len__(self):
+        return len(self.imgs)
+    
+    def __getitem__(self, idx):
+        file_image = self.imgs[idx]
+        file_label = self.imgs[idx][:-3] + 'xml'
+        img_path = os.path.join(self.path, file_image)
+        
+        if 'test' in self.path:
+            label_path = os.path.join('data/test_annotations/', file_label)
+        else:
+            label_path = os.path.join('data/annotations/', file_label)
+        
+        image = cv2.imread(img_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        
+        target = generate_target(label_path)
+        
+        if self.transform:
+            transformed = self.transform(image = image, bboxes = target['boxes'], labels = target['labels'])
+            image = transformed['image']
+            target = {
+                'boxes': transformed['bboxes'],
+                'labels': transformed['labels']
+            }
+            
+        return image, target
 
 def collate_fn(batch):
     return tuple(zip(*batch))
