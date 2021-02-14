@@ -1,16 +1,16 @@
 import torch
 import torchvision
 from tqdm import tqdm
-import func
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from torchvision import transforms, datasets, models
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 
+import func
+import utils_ObjectDetection as utils
+
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 print("device: ", device)
-
-# retina = torchvision.models.detection.retinanet_resnet50_fpn(num_classes=3)
 
 model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
 in_features = model.roi_heads.box_predictor.cls_score.in_features
@@ -46,7 +46,7 @@ for im, annot in tqdm(test_data_loader, position = 0, leave = True):
         preds_adj_all.append(preds_adj)
         annot_all.append(annot)
     
-    break
+    # break
 
 # print(labels)
 # print(preds_adj_all)
@@ -85,12 +85,24 @@ def test_plot_images(img, real, pred):
             rect = patches.Rectangle((xmin,ymin),(xmax-xmin),(ymax-ymin),linewidth=1,edgecolor='orange',facecolor='none')
         ax2.add_patch(rect)
         
-#     plt.show()
+    plt.show()
 
-batch_i = 0
-for im, annot in test_data_loader:
-    for sample_i in range(len(im)):
-        test_plot_images(im[sample_i], annot[sample_i], preds_adj_all[batch_i][sample_i])
-    batch_i += 1
-    if batch_i == 1:
-        break
+# batch_i = 0
+# for im, annot in test_data_loader:
+#     for sample_i in range(len(im)):
+#         test_plot_images(im[sample_i], annot[sample_i], preds_adj_all[batch_i][sample_i])
+#     batch_i += 1
+#     if batch_i == 1:
+#         break
+
+
+sample_metrics = []
+for batch_i in range(len(preds_adj_all)):
+    sample_metrics += utils.get_batch_statistics(preds_adj_all[batch_i], annot_all[batch_i], iou_threshold=0.5) 
+
+true_positives, pred_scores, pred_labels = [torch.cat(x, 0) for x in list(zip(*sample_metrics))]
+precision, recall, AP, f1, ap_class = utils.ap_per_class(true_positives, pred_scores, pred_labels, torch.tensor(labels))
+mAP = torch.mean(AP)
+
+print(f'mAP : {mAP}')
+print(f'AP : {AP}')
