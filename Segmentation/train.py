@@ -16,15 +16,18 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 print("Device: ", device)
 
+# parameters
 batch_size_train = 8
 batch_size_val = 2
-num_epoch = 1
+num_epoch = 100
 lr = 0.001
 momentum = 0.9
 
 base_transform = torchvision.transforms.Compose([
     torchvision.transforms.ToTensor(),
 ])
+
+# Load data
 
 train_dataset = KneeDataset('./data/train_knee/', transform=base_transform)
 val_dataset = KneeDataset('./data/validation_knee/', transform=base_transform)
@@ -41,6 +44,7 @@ optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=momentum)
 
 # training
 print("start training")
+best_loss = 1.0
 for epoch in range(1, num_epoch+1):
     net.train()
     epoch_loss = []
@@ -57,7 +61,8 @@ for epoch in range(1, num_epoch+1):
         epoch_loss += [loss.item()]
         
     print(f"train epoch: {epoch}/{num_epoch}, loss: {np.mean(epoch_loss):.3f}")
-
+  
+    # validation
     with torch.no_grad():
         net.eval()
         epoch_loss = []
@@ -71,8 +76,21 @@ for epoch in range(1, num_epoch+1):
             loss = criterion(outputs, labels)
 
             epoch_loss += [loss.item()]
-
-            print(f"val epoch: {epoch}/{num_epoch}, loss: {np.mean(epoch_loss):.3f}")
-
+            
+        mean_loss = np.mean(epoch_loss)
+        print(f"val epoch: {epoch}/{num_epoch}, loss: {mean_loss:.3f}")
+        
+        # best model save
+        if mean_loss < best_loss:
+            best_loss = mean_loss
+            
+            torch.save({
+                'epoch': epoch,
+                'model_state_dict': net.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': best_loss
+                }, 'best_unet.pt')
+    
+    
 # Save model
-torch.save(net.state_dict(), 'unet.pt')
+# torch.save(net.state_dict(), 'unet.pt')
