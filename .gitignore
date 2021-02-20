@@ -168,4 +168,6 @@ dmypy.json
 
 data/
 
-Detection/*.pt
+*/*.pt
+
+Segmentation/result
