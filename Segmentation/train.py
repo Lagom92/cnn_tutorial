@@ -2,10 +2,10 @@ import os
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
 import torchvision
+import matplotlib.pyplot as plt
+import numpy as np
+import cv2
 
 from func import KneeDataset
 from model import UNet
@@ -20,14 +20,13 @@ print("Device: ", device)
 batch_size_train = 8
 batch_size_val = 2
 num_epoch = 100
-lr = 0.001
+lr = 0.0001
 momentum = 0.9
 
+# Load data
 base_transform = torchvision.transforms.Compose([
     torchvision.transforms.ToTensor(),
 ])
-
-# Load data
 
 train_dataset = KneeDataset('./data/train_knee/', transform=base_transform)
 val_dataset = KneeDataset('./data/validation_knee/', transform=base_transform)
@@ -66,13 +65,11 @@ for epoch in range(1, num_epoch+1):
     with torch.no_grad():
         net.eval()
         epoch_loss = []
-
         for img, mask in val_data_loader:
             inputs = img.to(device)
             labels = mask.to(device)
 
             outputs = net(inputs)
-
             loss = criterion(outputs, labels)
 
             epoch_loss += [loss.item()]
@@ -80,7 +77,7 @@ for epoch in range(1, num_epoch+1):
         mean_loss = np.mean(epoch_loss)
         print(f"val epoch: {epoch}/{num_epoch}, loss: {mean_loss:.3f}")
         
-        # best model save
+        # Save best model 
         if mean_loss < best_loss:
             best_loss = mean_loss
             
@@ -90,6 +87,8 @@ for epoch in range(1, num_epoch+1):
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': best_loss
                 }, 'best_unet.pt')
+                
+            print(f"Save ckpt | loss: {best_loss}")
     
     
 # Save model

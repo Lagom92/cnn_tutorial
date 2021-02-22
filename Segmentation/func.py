@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import torchvision
-
+from PIL import Image
 
 class KneeDataset(Dataset):
     def __init__(self, path, transform=None):
@@ -37,23 +37,27 @@ class KneeDataset(Dataset):
         image_path = os.path.join(self.path, self.lst_data[idx])
         mask_path = os.path.join(self.path, self.lst_mask[idx])
         
-        img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-        img = cv2.resize(img, (512, 512), interpolation=cv2.INTER_CUBIC)
-        img = np.asarray(img, np.float32)
-        img /= 255.0
+        img = Image.open(image_path).convert('L')
+        mask = Image.open(mask_path).convert('1')
         
-        mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
-        mask = cv2.resize(mask, (512, 512), interpolation=cv2.INTER_CUBIC)
-        mask = np.asarray(mask, np.float32)
-        mask /= 255.0
+        img_resized = img.resize((512, 512))
+        mask_resized = mask.resize((512, 512))
+        
+        # to array
+        img_arr = np.array(img_resized, 'float32')
+        mask_arr = np.array(mask_resized)
+        
+        img_arr = img_arr / 255.0
+        mask_arr = mask_arr.astype(float)
 
-        if img.ndim == 2:
-            img = img[:, :, np.newaxis]
-        if mask.ndim == 2:
-            mask = mask[:, :, np.newaxis]
+        if img_arr.ndim == 2:
+            img_arr = img_arr[:, :, np.newaxis]
+        if mask_arr.ndim == 2:
+            mask_arr = mask_arr[:, :, np.newaxis]
 
         if self.transform:
-            img = self.transform(img)
-            mask = self.transform(mask)
+            img_arr = self.transform(img_arr)
+            mask_arr = self.transform(mask_arr)
         
-        return img, mask
+        return img_arr, mask_arr
+        

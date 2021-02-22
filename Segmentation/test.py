@@ -14,7 +14,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print("Device: ", device)
 
 batch_size_test = 1
-lr = 0.001
+lr = 0.0001
 momentum = 0.9
 
 base_transform = torchvision.transforms.Compose([
@@ -30,7 +30,7 @@ net = UNet().to(device)
 
 optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=momentum)
 
-ckpt = torch.load('best_unet.pt', map_location=torch.device('cpu'))
+ckpt = torch.load('best_unet.pt')
 net.load_state_dict(ckpt['model_state_dict'])
 optimizer.load_state_dict(ckpt['optimizer_state_dict'])
 
@@ -42,9 +42,9 @@ with torch.no_grad():
         labels = mask.to(device)
         outputs = net(inputs)
 
-        plt.imsave(f"./result/{i}_inputs.png", inputs.squeeze(), cmap='gray')
-        plt.imsave(f"./result/{i}_labels.png", labels.squeeze(), cmap='gray')
-        plt.imsave(f"./result/{i}_pred.png", outputs.squeeze(), cmap='gray')
+        plt.imsave(f"./result/{i}_inputs.png", inputs.cpu().squeeze(), cmap='gray')
+        plt.imsave(f"./result/{i}_labels.png", labels.cpu().squeeze(), cmap='gray')
+        plt.imsave(f"./result/{i}_pred.png", outputs.cpu().squeeze(), cmap='gray')
 
         i += 1
         
