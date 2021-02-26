@@ -48,7 +48,13 @@ class KneeDataset(Dataset):
         mask_arr = np.array(mask_resized)
         
         img_arr = img_arr / 255.0
+        
         mask_arr = mask_arr.astype(float)
+        
+        mean = 0.5
+        std = 0.5
+        
+        img_arr = (img_arr - mean) / std
 
         if img_arr.ndim == 2:
             img_arr = img_arr[:, :, np.newaxis]

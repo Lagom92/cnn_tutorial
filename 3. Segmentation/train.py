@@ -19,8 +19,8 @@ print("Device: ", device)
 # parameters
 batch_size_train = 8
 batch_size_val = 2
-num_epoch = 100
-lr = 0.0001
+num_epoch = 30
+lr = 0.001
 momentum = 0.9
 
 # Load data
