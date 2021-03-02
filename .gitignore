@@ -171,3 +171,5 @@ data/
 */*.pt
 
 Segmentation/result
+
+runs
