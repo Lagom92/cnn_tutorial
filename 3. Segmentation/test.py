@@ -3,6 +3,7 @@ import torch
 from torch.utils.data import Dataset
 import matplotlib.pyplot as plt
 import torchvision
+import numpy as np
 
 from func import KneeDataset
 from model import UNet
@@ -41,10 +42,16 @@ with torch.no_grad():
         inputs = img.to(device)
         labels = mask.to(device)
         outputs = net(inputs)
+        
+        inputs = inputs.squeeze()
+        labels = labels.squeeze()
+        outputs = outputs.squeeze()
+        
+        pred = np.logical_not(outputs.cpu() < 0.5)
 
-        plt.imsave(f"./result/{i}_inputs.png", inputs.cpu().squeeze(), cmap='gray')
-        plt.imsave(f"./result/{i}_labels.png", labels.cpu().squeeze(), cmap='gray')
-        plt.imsave(f"./result/{i}_pred.png", outputs.cpu().squeeze(), cmap='gray')
+        plt.imsave(f"./result/{i}_inputs.png", inputs.cpu(), cmap='gray')
+        plt.imsave(f"./result/{i}_labels.png", labels.cpu(), cmap='gray')
+        plt.imsave(f"./result/{i}_pred.png", pred, cmap='gray')
 
         i += 1
         
