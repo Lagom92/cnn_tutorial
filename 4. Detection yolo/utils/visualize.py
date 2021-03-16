@@ -180,10 +180,11 @@ def visualize_boxes_and_labels_on_image_array(
     instance_boundaries=None,
     use_normalized_coordinates=False,
     max_boxes_to_draw=20,
-    min_score_thresh=0.5,
+    # min_score_thresh=0.5,
+    min_score_thresh=0.3,
     agnostic_mode=False,
     line_thickness=4,
-    groundtruth_box_visualization_color="black",
+    groundtruth_box_visualization_color="red",
     skip_scores=False,
     skip_labels=False,
 ):
@@ -233,44 +234,49 @@ def visualize_boxes_and_labels_on_image_array(
     box_to_instance_boundaries_map = {}
     if not max_boxes_to_draw:
         max_boxes_to_draw = boxes.shape[0]
-
+    
     sorted_ind = np.argsort(-scores)
     boxes = boxes[sorted_ind]
     scores = scores[sorted_ind]
     classes = classes[sorted_ind]
-    for i in range(min(max_boxes_to_draw, boxes.shape[0])):
-        if scores is None or scores[i] > min_score_thresh:
-            box = tuple(boxes[i].tolist())
-            if instance_masks is not None:
-                box_to_instance_masks_map[box] = instance_masks[i]
-            if instance_boundaries is not None:
-                box_to_instance_boundaries_map[box] = instance_boundaries[i]
-            if scores is None:
-                box_to_color_map[box] = groundtruth_box_visualization_color
-            else:
-                display_str = ""
-                if not skip_labels:
-                    if not agnostic_mode:
-                        if classes[i] in category_index.keys():
-                            class_name = category_index[classes[i]]["name"]
-                        else:
-                            class_name = "N/A"
-                        display_str = str(class_name)
-                if not skip_scores:
-                    if not display_str:
-                        display_str = "{}%".format(int(100 * scores[i]))
-                    else:
-                        display_str = "{}: {}%".format(
-                            display_str, int(100 * scores[i])
-                        )
-                box_to_display_str_map[box].append(display_str)
-                if agnostic_mode:
-                    box_to_color_map[box] = "DarkOrange"
-                else:
-                    box_to_color_map[box] = STANDARD_COLORS[
-                        classes[i] % len(STANDARD_COLORS)
-                    ]
+    flag = [0]*6
 
+    for i in range(boxes.shape[0]):
+    # for i in range(min(max_boxes_to_draw, boxes.shape[0])):
+        if scores is None or scores[i] > min_score_thresh:
+            if flag[classes[i]] == 0:
+                flag[classes[i]] = 1
+                box = tuple(boxes[i].tolist())
+                if instance_masks is not None:
+                    box_to_instance_masks_map[box] = instance_masks[i]
+                if instance_boundaries is not None:
+                    box_to_instance_boundaries_map[box] = instance_boundaries[i]
+                if scores is None:
+                    box_to_color_map[box] = groundtruth_box_visualization_color
+                else:
+                    display_str = ""
+                    # bbox text 
+                    if not skip_labels:
+                        if not agnostic_mode:
+                            if classes[i] in category_index.keys():
+                                class_name = category_index[classes[i]]["name"]
+                            else:
+                                class_name = "N/A"
+                            display_str = str(class_name)
+                    if not skip_scores:
+                        if not display_str:
+                            display_str = "{}%".format(int(100 * scores[i]))
+                        else:
+                            display_str = "{}: {}%".format(
+                                display_str, int(100 * scores[i])
+                            )
+                    box_to_display_str_map[box].append(display_str)
+                    if agnostic_mode:
+                        box_to_color_map[box] = "DarkOrange"
+                    else:
+                        box_to_color_map[box] = STANDARD_COLORS[
+                            classes[i] % len(STANDARD_COLORS)
+                        ]
     # Draw all boxes onto image.
     for box, color in box_to_color_map.items():
         xmin, ymin, xmax, ymax = box

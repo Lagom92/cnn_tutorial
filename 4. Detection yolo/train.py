@@ -144,4 +144,4 @@ for epoch in range(start_epoch, epochs):
             "model": yolov4.state_dict(),
             "optimizer": optimizer.state_dict(),
         }
-        torch.save(chkpt, './weight/model.pt')
+        torch.save(chkpt, './model.pt')
