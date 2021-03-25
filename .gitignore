@@ -186,3 +186,5 @@ data_splited
 test_img
 
 argusswift_yolov4
+
+*.pt
