@@ -105,6 +105,7 @@ class Mixup(object):
         self.p = p
 
     def __call__(self, img_org, bboxes_org, img_mix, bboxes_mix):
+#         print(img_org.shape, bboxes_org.shape, img_mix.shape, bboxes_mix.shape)
         if random.random() > self.p:
             lam = np.random.beta(1.5, 1.5)
             img = lam * img_org + (1 - lam) * img_mix
@@ -117,7 +118,7 @@ class Mixup(object):
         else:
             img = img_org
             bboxes = np.concatenate([bboxes_org, np.full((len(bboxes_org), 1), 1.0)], axis=1)
-
+#         print(img.shape, bboxes.shape)
         return img, bboxes
 
 

@@ -29,6 +29,9 @@ class Evaluator(object):
         self.device = next(model.parameters()).device
 
     def APs_voc(self, multi_test=False, flip_test=False):
+        
+        data_lst = os.path.join('../data/')
+        
         img_inds_file = os.path.join(self.val_data_path,  'ImageSets', 'Main', 'test.txt')
         with open(img_inds_file, 'r') as f:
             lines = f.readlines()
@@ -70,20 +73,21 @@ class Evaluator(object):
         return self.__calc_APs()
 
     def get_bbox(self, img, multi_test=False, flip_test=False):
-        if multi_test:
-            test_input_sizes = range(320, 640, 96)
-            bboxes_list = []
-            for test_input_size in test_input_sizes:
-                valid_scale =(0, np.inf)
-                bboxes_list.append(self.__predict(img, test_input_size, valid_scale))
-                if flip_test:
-                    bboxes_flip = self.__predict(img[:, ::-1], test_input_size, valid_scale)
-                    bboxes_flip[:, [0, 2]] = img.shape[1] - bboxes_flip[:, [2, 0]]
-                    bboxes_list.append(bboxes_flip)
-            bboxes = np.row_stack(bboxes_list)
-        else:
-            bboxes = self.__predict(img, self.val_shape, (0, np.inf))
-
+#         if multi_test:
+#             test_input_sizes = range(320, 640, 96)
+#             bboxes_list = []
+#             for test_input_size in test_input_sizes:
+#                 valid_scale =(0, np.inf)
+#                 bboxes_list.append(self.__predict(img, test_input_size, valid_scale))
+#                 if flip_test:
+#                     bboxes_flip = self.__predict(img[:, ::-1], test_input_size, valid_scale)
+#                     bboxes_flip[:, [0, 2]] = img.shape[1] - bboxes_flip[:, [2, 0]]
+#                     bboxes_list.append(bboxes_flip)
+#             bboxes = np.row_stack(bboxes_list)
+#         else:
+#             bboxes = self.__predict(img, self.val_shape, (0, np.inf))
+            
+        bboxes = self.__predict(img, self.val_shape, (0, np.inf))
         bboxes = nms(bboxes, self.conf_thresh, self.nms_thresh)
 
         return bboxes

@@ -23,8 +23,7 @@ def parse_voc_annotation(data_path, file_type, anno_path, use_difficult_bbox=Fal
 
     with open(anno_path, 'a') as f:
         for image_id in tqdm(image_ids):
-            # image_path = os.path.join(data_path, 'JPEGImages', image_id + '.jpg')
-            image_path = data_path + 'JPEGImages/' + image_id + '.jpg'
+            image_path = os.path.join(data_path, 'JPEGImages', image_id + '.jpg')
             annotation = image_path
             label_path = os.path.join(data_path, 'Annotations', image_id + '.xml')
             root = ET.parse(label_path).getroot()
@@ -49,14 +48,14 @@ def parse_voc_annotation(data_path, file_type, anno_path, use_difficult_bbox=Fal
 if __name__ =="__main__":
     # train_set :  VOC2007_trainval 和 VOC2012_trainval
     # train_data_path_2007 = r'C:\Users\jyyt0\lagom\cnn_tutorial\detection_yolov3\YOLOV3\data\VOCtest-2007\VOCdevkit\VOC2007'
-    train_data_path_2012 = cfg.DATA_PATH + 'VOCtrainval-2012/' + 'VOCdevkit/' + 'VOC2012/'
-    train_annotation_path = './data/train_annotation.txt'
+    train_data_path_2012 = r'C:\Users\jyyt0\lagom\cnn_tutorial\detection_yolov3\YOLOV3\data\VOCtrainval-2012\VOCdevkit\VOC2012'
+    train_annotation_path = r'C:\Users\jyyt0\lagom\cnn_tutorial\detection_yolov3\YOLOV3\data\train_annotation.txt'
     
 
     # val_set   : VOC2007_test
     # test_data_path_2007 = os.path.join(cfg.DATA_PATH, 'VOCtest-2007', 'VOCdevkit', 'VOC2007')
-    test_data_path_2007 = cfg.DATA_PATH + 'VOCtest-2007/' + 'VOCdevkit/' + 'VOC2007/'
-    test_annotation_path = './data/test_annotation.txt'
+    test_data_path_2007 = r'C:\Users\jyyt0\lagom\cnn_tutorial\detection_yolov3\YOLOV3\data\VOCtest-2007\VOCdevkit\VOC2007'
+    test_annotation_path = r'C:\Users\jyyt0\lagom\cnn_tutorial\detection_yolov3\YOLOV3\data\test_annotation.txt'
     
 
     len_train = parse_voc_annotation(train_data_path_2012, "trainval", train_annotation_path, use_difficult_bbox=False)

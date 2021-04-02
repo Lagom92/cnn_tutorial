@@ -1,3 +1,6 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 from torch.utils.data import DataLoader
 import utils.gpu as gpu
 from model.yolov3 import Yolov3
@@ -9,8 +12,10 @@ import os
 import config.yolov3_config_voc as cfg
 from utils.visualize import *
 
-# import os
-# os.environ["CUDA_VISIBLE_DEVICES"]='0'
+# GPU device
+# Check GPU
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print("Device: ", device)
 
 
 class Tester(object):
@@ -46,7 +51,7 @@ class Tester(object):
 
         weight = os.path.join(weight_path)
         chkpt = torch.load(weight, map_location=self.__device)
-#         self.__model.load_state_dict(chkpt['model'])
+#         print(chkpt)
         self.__model.load_state_dict(chkpt)
         print("loading weight file is done")
         del chkpt

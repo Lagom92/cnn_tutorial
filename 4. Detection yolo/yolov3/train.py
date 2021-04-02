@@ -1,3 +1,6 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 import logging
 import utils.gpu as gpu
 from model.yolov3 import Yolov3
@@ -17,8 +20,10 @@ import config.yolov3_config_voc as cfg
 from utils import cosine_lr_scheduler
 
 
-# import os
-# os.environ["CUDA_VISIBLE_DEVICES"]='2'
+# GPU device
+# Check GPU
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print("Device: ", device)
 
 
 class Trainer(object):
@@ -29,7 +34,6 @@ class Trainer(object):
         self.best_mAP = 0.
         self.epochs = cfg.TRAIN["EPOCHS"]
         self.weight_path = weight_path
-        # self.weight_path = './weight/darknet53_448.weights'
         self.multi_scale_train = cfg.TRAIN["MULTI_SCALE_TRAIN"]
         self.train_dataset = data.VocDataset(anno_file_type="train", img_size=cfg.TRAIN["TRAIN_IMG_SIZE"])
         self.train_dataloader = DataLoader(self.train_dataset,
